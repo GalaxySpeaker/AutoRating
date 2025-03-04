@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net4.8</TargetFramework>
-    <AssemblyName>KeyboardChatterBlocker</AssemblyName>
-    <RootNamespace>KeyboardChatterBlocker</RootNamespace>
+    <AssemblyName>AutoRating</AssemblyName>
+    <RootNamespace>AutoRating</RootNamespace>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,15 +29,6 @@
     <Reference Include="AdofaiTweaks">
       <HintPath>bin\Release\net4.8\AdofaiTweaks.dll</HintPath>
     </Reference>
-    <Reference Include="AdofaiTweaks.Compat.Async">
-      <HintPath>bin\Release\net4.8\AdofaiTweaks.Compat.AsyncPolyfill.dll</HintPath>
-    </Reference>
-    <Reference Include="AdofaiTweaks.Strings">
-      <HintPath>bin\Release\net4.8\AdofaiTweaks.Strings.dll</HintPath>
-    </Reference>
-    <Reference Include="AdofaiTweaks.Translation">
-      <HintPath>bin\Release\net4.8\AdofaiTweaks.Translation.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>bin\Release\net4.8\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -51,9 +43,6 @@
     </Reference>
     <Reference Include="dnlib">
       <HintPath>bin\Release\net4.8\dnlib.dll</HintPath>
-    </Reference>
-    <Reference Include="DotNetZip">
-      <HintPath>bin\Release\net4.8\DotNetZip.dll</HintPath>
     </Reference>
     <Reference Include="DOTween">
       <HintPath>bin\Release\net4.8\DOTween.dll</HintPath>
@@ -79,11 +68,8 @@
     <Reference Include="I18N.West">
       <HintPath>bin\Release\net4.8\I18N.West.dll</HintPath>
     </Reference>
-    <Reference Include="Ionic.Zip">
-      <HintPath>bin\Release\net4.8\Ionic.Zip.dll</HintPath>
-    </Reference>
-    <Reference Include="LiteDB">
-      <HintPath>bin\Release\net4.8\LiteDB.dll</HintPath>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>bin\Release\net4.8\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Data.Sqlite">
       <HintPath>bin\Release\net4.8\Mono.Data.Sqlite.dll</HintPath>
@@ -97,9 +83,6 @@
     <Reference Include="Mono.WebBrowser">
       <HintPath>bin\Release\net4.8\Mono.WebBrowser.dll</HintPath>
     </Reference>
-    <Reference Include="mscorlib">
-      <HintPath>bin\Release\net4.8\mscorlib.dll</HintPath>
-    </Reference>
     <Reference Include="netstandard">
       <HintPath>bin\Release\net4.8\netstandard.dll</HintPath>
     </Reference>
@@ -111,6 +94,9 @@
     </Reference>
     <Reference Include="Ookii.Dialogs">
       <HintPath>bin\Release\net4.8\Ookii.Dialogs.dll</HintPath>
+    </Reference>
+    <Reference Include="Overlayer">
+      <HintPath>bin\Release\net4.8\Overlayer.dll</HintPath>
     </Reference>
     <Reference Include="Purchasing.Common">
       <HintPath>bin\Release\net4.8\Purchasing.Common.dll</HintPath>
@@ -130,8 +116,12 @@
     <Reference Include="SkyHook.Unity">
       <HintPath>bin\Release\net4.8\SkyHook.Unity.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="Unity.Addressables">
       <HintPath>bin\Release\net4.8\Unity.Addressables.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.AI.Navigation">
+      <HintPath>bin\Release\net4.8\Unity.AI.Navigation.dll</HintPath>
     </Reference>
     <Reference Include="Unity.MemoryProfiler">
       <HintPath>bin\Release\net4.8\Unity.MemoryProfiler.dll</HintPath>
@@ -141,9 +131,6 @@
     </Reference>
     <Reference Include="Unity.ScriptableBuildPipeline">
       <HintPath>bin\Release\net4.8\Unity.ScriptableBuildPipeline.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Services.Analytics">
-      <HintPath>bin\Release\net4.8\Unity.Services.Analytics.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Services.Core">
       <HintPath>bin\Release\net4.8\Unity.Services.Core.dll</HintPath>
@@ -220,6 +207,9 @@
     <Reference Include="UnityEngine.ClusterRendererModule">
       <HintPath>bin\Release\net4.8\UnityEngine.ClusterRendererModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ContentLoadModule">
+      <HintPath>bin\Release\net4.8\UnityEngine.ContentLoadModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>bin\Release\net4.8\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
@@ -279,6 +269,9 @@
     </Reference>
     <Reference Include="UnityEngine.ProfilerModule">
       <HintPath>bin\Release\net4.8\UnityEngine.ProfilerModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PropertiesModule">
+      <HintPath>bin\Release\net4.8\UnityEngine.PropertiesModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Purchasing">
       <HintPath>bin\Release\net4.8\UnityEngine.Purchasing.dll</HintPath>
@@ -355,17 +348,11 @@
     <Reference Include="UnityEngine.TLSModule">
       <HintPath>bin\Release\net4.8\UnityEngine.TLSModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UaaLAnalyticsModule">
-      <HintPath>bin\Release\net4.8\UnityEngine.UaaLAnalyticsModule.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>bin\Release\net4.8\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIElementsModule">
       <HintPath>bin\Release\net4.8\UnityEngine.UIElementsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIElementsNativeModule">
-      <HintPath>bin\Release\net4.8\UnityEngine.UIElementsNativeModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
       <HintPath>bin\Release\net4.8\UnityEngine.UIModule.dll</HintPath>
@@ -373,8 +360,8 @@
     <Reference Include="UnityEngine.UmbraModule">
       <HintPath>bin\Release\net4.8\UnityEngine.UmbraModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UNETModule">
-      <HintPath>bin\Release\net4.8\UnityEngine.UNETModule.dll</HintPath>
+    <Reference Include="UnityEngine.UnityAnalyticsCommonModule">
+      <HintPath>bin\Release\net4.8\UnityEngine.UnityAnalyticsCommonModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityAnalyticsModule">
       <HintPath>bin\Release\net4.8\UnityEngine.UnityAnalyticsModule.dll</HintPath>
