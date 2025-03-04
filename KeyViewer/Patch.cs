@@ -1,206 +1,88 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using AdofaiTweaks.Compat.Async;
-using AdofaiTweaks.Core;
-using AdofaiTweaks.Tweaks.KeyLimiter;
+﻿using AdofaiRater;
+using AutoRating.AdofaiRater;
 using HarmonyLib;
-using SkyHook;
+using Overlayer;
 using UnityEngine;
-using UnityModManagerNet;
-using static UnityModManagerNet.UnityModManager;
 
-namespace KeyboardChatterBlocker
+namespace AutoRating
 {
+
+
     public static class Patch
     {
+        public static double CalculatedFinalLevelRating = 0;
+        public static double PP = 0;
 
-        public static Dictionary<ushort, long> lastKeyPressAsync = new Dictionary<ushort, long>();
-        public static Dictionary<KeyCode, long> lastKeyPress = new Dictionary<KeyCode, long>();
+        private static bool IsOverlayerEnabled => AccessTools.TypeByName("TaggedText") != null;
 
-        [HarmonyPatch(typeof(scnEditor), "Play")]
-        public static class scnEditor_Play
+        [HarmonyPatch(typeof(scnGame), "LoadLevel")]
+        public static class scnGame_LoadLevel
         {
-            public static void Prefix()
+            [HarmonyPostfix]
+            public static void Postfix()
             {
-                ModEntry tweaks = UnityModManager.FindMod("AdofaiTweaks");
-                if (tweaks != null && tweaks.Active)
+                CalculatedFinalLevelRating = RaterMain.ProcessRatings(scnGame.instance.levelPath);
+                CalculatePP.Reset();
+            }
+        }
+
+        [HarmonyPatch(typeof(scrController), "Hit")]
+        public static class scrController_Hit
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                CalculatePP.count++;
+                if (CalculatePP.count != 0)
                 {
-                    Main.usingTweaks = true;
-                }
-                else
-                {
-                    Main.usingTweaks = false;
-                }
-                if (Main.usingTweaks)
-                {
-                    Main.kls = Utils.GetKeyLimiterSettings();
+                    PP = CalculatePP.ProcessPP();
                 }
             }
         }
 
-        [HarmonyPatch(typeof(scrController), "CountValidKeysPressed")]
-        [HarmonyBefore("adofai_tweaks.key_limiter")]
-        public static class scrController_CountValidKeysPressed
+        [HarmonyPatch(typeof(scnGame), "Play")]
+        public static class scnGame_Play
         {
-            public static bool Prefix(ref int __result)
+            [HarmonyPostfix]
+            private static void Postfix()
             {
-                if (Main.usingTweaks && Main.kls.IsEnabled)
-                {
-                    __result = Mathf.Min(4, scrController_CountValidKeysPressed_Tweaks());
-                }
-                else
-                {
-                    __result = Mathf.Min(4, scrController_CountValidKeysPressed_NoTweaks());
-                }
-                return false;
+                CalculatePP.Reset();
             }
         }
-        
 
-        private static int scrController_CountValidKeysPressed_NoTweaks()
+        public static void Postfix(TaggedText __instance)
         {
-            int num = 0;
-            if (AsyncInputManager.isActive)
-            {
-                long now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                foreach (AnyKeyCode akc in RDInput.GetMainPressKeys())
-                {
-                    if (akc.value is AsyncKeyCode && AsyncInput.GetKeyDown((AsyncKeyCode)akc.value, false))
-                    {
-                        ushort keycode = ((AsyncKeyCode)akc.value).key;
-                        if (!lastKeyPressAsync.ContainsKey(keycode))
-                        {
-                            lastKeyPressAsync.Add(keycode, 0L);
-                        }
-                        if (now - lastKeyPressAsync[keycode] > (long)Main.setting.inputInterval || now - lastKeyPressAsync[keycode] <= 2L)
-                        {
-                            num++;
-                            lastKeyPressAsync[keycode] = now;
-                        }
-                        else
-                        {
-                            Main.Logger.Log("Blocked Async Key: " + keycode + " time: " + (now - lastKeyPressAsync[keycode]) + "ms.");
-                        }
-                    }
-                }
-            }
-            else
-            {
-                long now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                foreach (int k in Enum.GetValues(typeof(KeyCode)))
-                {
-                    KeyCode keycode = (KeyCode)k;
-                    if (Input.GetKeyDown(keycode))
-                    {
-                        if (!lastKeyPress.ContainsKey(keycode))
-                        {
-                            lastKeyPress.Add(keycode, 0L);
-                        }
-                        if (now - lastKeyPress[keycode] > (long)Main.setting.inputInterval || now - lastKeyPress[keycode] <= 2L)
-                        {
-                            num++;
-                            lastKeyPress[keycode] = now;
-                        }
-                        else
-                        {
-                            Main.Logger.Log("Blocked Key: " + keycode + " time: " + (now - lastKeyPress[keycode]) + "ms.");
-                        }
-                    }
-                }
-            }
-            return num;
-        }
 
-        private static int scrController_CountValidKeysPressed_Tweaks()
-        {
-            int num = 0;
-            if (AsyncInputManager.isActive)
-            {
-                long now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                foreach (ushort keycode in Main.kls.ActiveAsyncKeys)
-                {
-                    if (AsyncInput.GetKeyDown(keycode, false))
-                    {
-                        if (!lastKeyPressAsync.ContainsKey(keycode))
-                        {
-                            lastKeyPressAsync.Add(keycode, 0L);
-                        }
-                        if (now - lastKeyPressAsync[keycode] > (long)Main.setting.inputInterval || now - lastKeyPressAsync[keycode] <= 1L)
-                        {
-                            num++;
-                            lastKeyPressAsync[keycode] = now;
-                        }
-                        else
-                        {
-                            Main.Logger.Log("Blocked Async Key: " + keycode + " time: " + (now - lastKeyPressAsync[keycode]) + "ms (Using AdofaiTweaks).");
-                        }
-                    }
-                }
-                foreach (KeyLabel keycode in Utils.ALWAYS_BOUND_ASYNC_KEYS)
-                {
-                    if (AsyncInput.GetKeyDown(keycode, false))
-                    {
-                        if (!lastKeyPressAsync.ContainsKey((ushort)keycode))
-                        {
-                            lastKeyPressAsync.Add((ushort)keycode, 0L);
-                        }
-                        if (now - lastKeyPressAsync[(ushort)keycode] > (long)Main.setting.inputInterval || now - lastKeyPressAsync[(ushort)keycode] <= 1L)
-                        {
-                            num++;
-                            lastKeyPressAsync[(ushort)keycode] = now;
-                        }
-                        else
-                        {
-                            Main.Logger.Log("Blocked Async Key: " + keycode + " time: " + (now - lastKeyPressAsync[(ushort)keycode]) + "ms (Using AdofaiTweaks).");
-                        }
-                    }
-                }
-            }
-            else
-            {
-                long now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                foreach (KeyCode keycode in Main.kls.ActiveKeys)
-                {
-                    if (Input.GetKeyDown(keycode))
-                    {
-                        if (!lastKeyPress.ContainsKey(keycode))
-                        {
-                            lastKeyPress.Add(keycode, 0L);
-                        }
-                        if (now - lastKeyPress[keycode] > (long)Main.setting.inputInterval || now - lastKeyPress[keycode] <= 2L)
-                        {
-                            num++;
-                            lastKeyPress[keycode] = now;
-                        }
-                        else
-                        {
-                            Main.Logger.Log("Blocked Key: " + keycode + " time: " + (now - lastKeyPress[keycode]) + "ms (Using AdofaiTweaks).");
-                        }
-                    }
-                }
+            if (!IsOverlayerEnabled)
+                return;
 
-                foreach (KeyCode keycode in KeyLimiterTweak.ALWAYS_BOUND_KEYS)
-                {
-                    if (Input.GetKeyDown(keycode))
-                    {
-                        if (!lastKeyPress.ContainsKey(keycode))
-                        {
-                            lastKeyPress.Add(keycode, 0L);
-                        }
-                        if (now - lastKeyPress[keycode] > (long)Main.setting.inputInterval || now - lastKeyPress[keycode] <= 2L)
-                        {
-                            num++;
-                            lastKeyPress[keycode] = now;
-                        }
-                        else
-                        {
-                            Main.Logger.Log("Blocked Key: " + keycode + " time: " + (now - lastKeyPress[keycode]) + "ms (Using AdofaiTweaks).");
-                        }
-                    }
-                }
-            }
-            return num;
+            string text = __instance.replacedText;
+
+
+            // AutoRating 详情
+            UnityEngine.Color color = PPUtils.GetColor(RaterMain.globalRating);
+            string colorHex = ColorUtility.ToHtmlStringRGB(color);
+            string colorHex2 = (RaterMain.globalRating >= 10) ? "FFFF00" : "FFFFFF";
+            string background = $"<color=#{colorHex}>█</color>";
+
+            string newText = text
+                .Replace("{AutoRating}", $"<color=#{colorHex2}>{Patch.CalculatedFinalLevelRating:F2}</color>")
+                .Replace("{AutoRatingBG}", $"<color=#{colorHex}>{background}</color>")
+                .Replace("{SpeedRating}", RaterMain.globalSpeedRating.ToString("F2"))
+                .Replace("{TechRating}", RaterMain.globalTechRating.ToString("F2"))
+                .Replace("{RhythmRating}", RaterMain.globalRhythmRating.ToString("F2"))
+                .Replace("{StaminaRating}", RaterMain.globalStaminaRating.ToString("F2"))
+                .Replace("{PP}", CalculatePP.PP.ToString("F2"))
+                .Replace("{maxPP}", CalculatePP.maxPP.ToString("F2"))
+                .Replace("{FinalScore}", CalculatePP.finalScore.ToString("F0"))
+                .Replace("{BaseMulti}", CalculatePP.baseMulti.ToString("F2")) 
+                .Replace("{BaseScore}", CalculatePP.baseScore.ToString())
+                .Replace("{MaxScore}", CalculatePP.maxScore.ToString())
+                .Replace("{PMaxCombo}", CalculatePP.pMaxCombo.ToString("F0"))
+                .Replace("{PCombo}", CalculatePP.pCombo.ToString("F0"))
+                .Replace("{MMaxCombo}", CalculatePP.mMaxCombo.ToString("F0"))
+                .Replace("{MCombo}", CalculatePP.mCombo.ToString("F0"));
+
         }
     }
 }

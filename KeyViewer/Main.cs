@@ -1,120 +1,125 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AdofaiRater;
 using HarmonyLib;
+using System;
+using System.IO;
 using System.Reflection;
-using UnityModManagerNet;
 using UnityEngine;
-using GDMiniJSON;
-using KeyboardChatterBlocker.Languages;
-using static UnityModManagerNet.UnityModManager;
-using AdofaiTweaks.Tweaks.KeyLimiter;
+using UnityModManagerNet;
 
-namespace KeyboardChatterBlocker
+namespace AutoRating
 {
     public static class Main
     {
-        public static UnityModManager.ModEntry.ModLogger Logger;
+        public static UnityModManager.ModEntry.ModLogger logger;
         public static UnityModManager.ModEntry modEntry;
 
         public static Harmony harmony;
-        public static Setting setting;
 
-        public static Dictionary<string, Language> langs = new Dictionary<string, Language>();
+        // 在 Main 中管理 RatingDisplay 实例
+        internal static RatingDisplay ratingDisplay;
 
-        public static bool usingTweaks = false;
-        public static KeyLimiterSettings kls;
+        // 控制是否展开面板的标志
+        private static bool showPanel = true;
+
+        // 控制评分显示位置和字体大小的滑条变量
+        private static float ratingPositionX = 0.1f;
+        private static float ratingPositionY = 0.1f;
+        private static int ratingFontSize = 30;
 
         public static void Setup(UnityModManager.ModEntry modEntry)
         {
+            LoadAssembly("Mods/AutoRating/MathNet.Numerics.dll");
+
             Main.modEntry = modEntry;
-            Main.Logger = modEntry.Logger;
-            Main.LoadLanguages();
-            Main.setting = new Setting();
-            Main.setting = UnityModManager.ModSettings.Load<Setting>(modEntry);
+            logger = modEntry.Logger;
+
             modEntry.OnToggle = OnToggle;
             modEntry.OnGUI = OnGUI;
-            modEntry.OnSaveGUI = OnSaveGUI;
         }
 
         private static bool OnToggle(UnityModManager.ModEntry modEntry, bool value)
         {
-            if(value)
+            if (value)
+            {
+                // 启动时实例化 RatingDisplay
+                GameObject obj = new GameObject("RatingDisplay");
+                ratingDisplay = obj.AddComponent<RatingDisplay>();
+                GameObject.DontDestroyOnLoad(obj);
+            }
+            else
+            {
+                // 关闭时销毁 RatingDisplay 对象
+                if (ratingDisplay != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(ratingDisplay.gameObject);
+                    ratingDisplay = null;
+                }
+            }
+
+            // 初始化或销毁 Harmony patch
+            if (value)
             {
                 harmony = new Harmony(modEntry.Info.Id);
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
-
-                ModEntry tweaks = UnityModManager.FindMod("AdofaiTweaks");
-                if (tweaks != null && tweaks.Active)
-                {
-                    usingTweaks = true;
-                }
-                else
-                {
-                    usingTweaks = false;
-                }
-
-                if (usingTweaks)
-                {
-                    kls = Utils.GetKeyLimiterSettings();
-                }
-            } 
+            }
             else
             {
                 harmony.UnpatchAll(modEntry.Info.Id);
             }
+
             return true;
         }
 
         private static void OnGUI(UnityModManager.ModEntry modEntry)
         {
-            /*foreach(MethodBase original in Harmony.GetAllPatchedMethods())
-            { 
-                if (original.HasMethodBody())
-                {
-                    Patches patchInfo = Harmony.GetPatchInfo(original);
-                    foreach (HarmonyLib.Patch p in patchInfo.Prefixes)
-                    {
-                        if (p.PatchMethod.Module.Name.Contains("AdofaiTweaks"))
-                        {
-                            Main.Logger.Log(p.owner);
-                        }
-                    }
-                }
-            }*/
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Language");
-            GUIStyle gs = new GUIStyle(GUI.skin.button);
-            foreach (string lang in langs.Keys)
+            // 设置GUI样式
+            GUIStyle labelStyle = new GUIStyle(GUI.skin.label)
             {
-                if (setting.lang.Equals(lang)) gs.fontStyle = FontStyle.Bold;
-                if (GUILayout.Button(lang, gs, GUILayout.Width(200))) setting.lang = lang;
-                gs.fontStyle = FontStyle.Normal;
-            }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
+                fontSize = ratingFontSize,  // 使用滑条调整的字体大小
+                alignment = TextAnchor.UpperLeft,
+                normal = { textColor = Color.white }
+            };
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(langs[setting.lang].chatter_threshold_label);
-            string s = GUILayout.TextField(setting.inputInterval + "", GUILayout.Width(150));
-            if (!s.Equals(""))
+            // 创建一个垂直布局容器
+            GUILayout.BeginVertical();
+
+            // 添加100px的空间
+            GUILayout.Space(100f);
+
+            // 显示评分
+            string globalRating = RaterMain.globalRating.ToString("F2");
+
+            // 控制评分位置的X和Y坐标
+            ratingPositionX = GUILayout.HorizontalSlider(ratingPositionX, 0f, Screen.width);
+            GUILayout.Label($"X Position: {ratingPositionX}", labelStyle);
+
+            ratingPositionY = GUILayout.HorizontalSlider(ratingPositionY, 0f, Screen.height);
+            GUILayout.Label($"Y Position: {ratingPositionY}", labelStyle);
+
+            // 控制评分的字体大小
+            ratingFontSize = (int)GUILayout.HorizontalSlider(ratingFontSize, 10f, 100f);
+            GUILayout.Label($"Font Size: {ratingFontSize}", labelStyle);
+
+            // 更新 RatingDisplay 中的值
+            if (ratingDisplay != null)
             {
-                setting.inputInterval = int.Parse(s);
+                ratingDisplay.positionX = ratingPositionX / Screen.width;  // 确保是0-1的范围
+                ratingDisplay.positionY = ratingPositionY / Screen.height; // 确保是0-1的范围
+                ratingDisplay.fontSize = ratingFontSize;
             }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
+
+            // 结束垂直布局容器
+            GUILayout.EndVertical();
         }
 
-        private static void OnSaveGUI(UnityModManager.ModEntry modEntry)
+        private static void LoadAssembly(string path)
         {
-            setting.Save(modEntry);
-        }
-
-        private static void LoadLanguages()
-        {
-            langs.Add("한국어", new Korean());
-            langs.Add("简体中文", new Chinese());
-            langs.Add("English", new English());
+            using (FileStream fileStream = new FileStream(path, FileMode.Open))
+            {
+                byte[] array = new byte[fileStream.Length];
+                fileStream.Read(array, 0, array.Length);
+                AppDomain.CurrentDomain.Load(array);
+            }
         }
     }
 }
