@@ -32,4 +32,5 @@ SensenPlayer - 特别感谢
 ###更新细则已隐藏 [暂时的]
 
 **Full Changelog**: https://github.com/GalaxySpeaker/AutoRating/commits/AutoRating
+
 **Latest Version Here**: https://github.com/GalaxySpeaker/AutoRating/releases
