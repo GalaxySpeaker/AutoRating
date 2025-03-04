@@ -1,10 +1,8 @@
 # 自动评级**AutoRating**
 ## 制作者
-GalaxySpeaker - 作者 & 算法 & 技术
-
-Sharky - 技术
-
-SensenPlayer - 特别感谢
+#### GalaxySpeaker - 作者 & 算法 & 技术 
+#### Sharky - 技术
+#### SensenPlayer - 特别感谢
 ## 留言
 这是一个冰与火之舞社区玩家GalaxySpeaker创建的自动评级算法
 感谢Sharky的技术支持, 感谢SensenPlayer陪我聊天
