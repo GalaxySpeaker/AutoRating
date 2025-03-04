@@ -4,8 +4,8 @@
 #### Sharky - 技术
 #### SensenPlayer - 特别感谢
 ## 留言
-这是一个冰与火之舞社区玩家GalaxySpeaker创建的自动评级算法
-感谢Sharky的技术支持, 感谢SensenPlayer陪我聊天
+-这是一个冰与火之舞社区玩家GalaxySpeaker创建的自动评级算法
+-感谢Sharky的技术支持, 感谢SensenPlayer陪我聊天
 
 ## 更新日志
 都是斯必克大神做的呢~
