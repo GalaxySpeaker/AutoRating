@@ -29,10 +29,21 @@
 ### 2025/2/24 ver 0.6.3
 ### 2025/3/3 ver 0.7.0
 -	**初次发布于GitHub**
+### 2025/3/5 ver 0.8.0
+-	修复了json读取的问题
+-	又一次修复了json读取的问题
+-	修复了NaN问题
+-	删去了Overlayer附属
+### 2025/3/5 ver 0.8.1
+-	**完全修复了旧版json读取的问题** (Perhaps)
+### 2025/3/6 ver 0.9.0
+-	**AutoRating 与Adofai.gg和TUF Forum的等级估算**
+-	调整了Rhythm Rating的部分数值
+### 2025/3/6 ver 0.9.1
+-	增加了一些颜色
 
-###更新细则已隐藏 [暂时的]
 
+### 部分更新细则已隐藏 [暂时的]
 
-**Full Changelog**: https://github.com/GalaxySpeaker/AutoRating/commits/AutoRating
 
 **Latest Version Here**: https://github.com/GalaxySpeaker/AutoRating/releases
