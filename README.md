@@ -1,4 +1,4 @@
-# AutoRating — ADOFAI Auto Rating MOD | AutoRating — ADOFAI 自动评级 MOD
+# ADOFAI Auto Rating MOD | AutoRating — ADOFAI 自动评级 MOD
 
 ## 👥 Credits | 致谢
 - **GalaxySpeaker** — Author | Algorithms | Development | 作者 | 算法 | 开发
